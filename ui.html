@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntelliJ UI Mock with Project Panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { display: flex; height: 100vh; background-color: #2b2b2b; color: #a9b7c6; overflow: hidden; }
+
+  /* Left panels container */
+  .left-panels {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    background-color: #313335;
+    overflow-y: auto;
+  }
+
+  /* Project panel */
+  .project-panel {
+    background-color: #313335;
+    padding: 10px;
+    border-bottom: 1px solid #444;
+  }
+  .project-panel h2 { color: #ffffff; font-size: 16px; margin-bottom: 10px; }
+  .file-item { padding: 5px 10px; cursor: pointer; color: #a9b7c6; border-radius: 4px; }
+  .file-item:hover, .file-item.active { background-color: #3c3f41; color: #ffffff; }
+
+  /* Question panel */
+  .question-panel {
+    padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .question-panel h2 { color: #ffffff; margin-bottom: 10px; font-size: 16px; }
+  .question-panel p, .question-panel ul { color: #c0c0c0; margin-bottom: 10px; }
+
+  /* Candidate info and marks */
+  .candidate-info {
+    background-color: #2d2f31;
+    padding: 10px;
+    border-top: 1px solid #444;
+    color: #a9b7c6;
+    font-size: 13px;
+  }
+  .candidate-info div { margin-bottom: 5px; }
+
+  /* Main editor area */
+  .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+  /* Tabs bar */
+  .tabs { display: flex; background-color: #3c3f41; height: 35px; align-items: center; padding-left: 10px; }
+  .tab { padding: 5px 15px; margin-right: 5px; background-color: #3c3f41; border-top-left-radius: 5px; border-top-right-radius: 5px; cursor: pointer; color: #a9b7c6; transition: background 0.2s; }
+  .tab.active { background-color: #2b2b2b; color: #ffffff; }
+
+  /* Editor area */
+  .editor { flex: 1; background-color: #2b2b2b; padding: 10px; overflow: auto; font-family: monospace; color: #a9b7c6; outline: none; white-space: pre; }
+  .line { display: flex; padding: 2px 0; }
+  .line-number { width: 40px; color: #606366; text-align: right; margin-right: 10px; user-select: none; }
+  .line.active { background-color: #323232; }
+
+  /* Status bar */
+  .status-bar { height: 25px; background-color: #3c3f41; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 12px; color: #a9b7c6; }
+  .status-bar div { display: flex; gap: 15px; }
+
+  /* Suggestion box */
+  .suggestion {
+    position: absolute;
+    bottom: 35px;
+    right: 10px;
+    background-color: #3c3f41;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+
+<!-- Left panels -->
+<div class="left-panels">
+  <!-- Project Panel -->
+  <div class="project-panel">
+    <h2>Project</h2>
+    <div class="file-item active" data-file="Main.java">Main.java</div>
+    <div class="file-item" data-file="Utils.java">Utils.java</div>
+    <div class="file-item" data-file="README.md">README.md</div>
+  </div>
+
+  <!-- Question Panel -->
+  <div class="question-panel">
+    <h2>Question: Sum of Two Numbers</h2>
+    <p>Write a function that takes two integers <strong>a</strong> and <strong>b</strong> and returns their sum.</p>
+    <p>Example:</p>
+    <p>Input: a = 2, b = 3<br>Output: 5</p>
+    <p>Constraints:</p>
+    <ul>
+      <li>-1000 ≤ a, b ≤ 1000</li>
+    </ul>
+  </div>
+
+  <!-- Candidate Info -->
+  <div class="candidate-info">
+    <div><strong>Candidate:</strong> John Doe</div>
+    <div><strong>Assessment:</strong> Software Engineering Principles</div>
+    <div><strong>Total Marks:</strong> 10</div>
+  </div>
+</div>
+
+<!-- Main editor area -->
+<div class="main">
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-file="Main.java">Main.java</div>
+    <div class="tab" data-file="Utils.java">Utils.java</div>
+    <div class="tab" data-file="README.md">README.md</div>
+  </div>
+
+  <!-- Editor -->
+  <div class="editor" id="editor" contenteditable="true"></div>
+
+  <!-- Suggestion box -->
+  <div class="suggestion" id="suggestion"></div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div>
+      <span>UTF-8</span>
+      <span>Spaces: 4</span>
+      <span id="cursor-position">Line 1, Column 1</span>
+    </div>
+    <div>
+      <span>Git: main</span>
+      <span>⚡ IntelliJ Mock</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const editor = document.getElementById('editor');
+const tabs = document.querySelectorAll('.tab');
+const fileItems = document.querySelectorAll('.file-item');
+const cursorPosition = document.getElementById('cursor-position');
+const suggestionBox = document.getElementById('suggestion');
+
+// Initial file contents
+const files = {
+  'Main.java': `public class Main {
+    public static void main(String[] args) {
+        int sum = Utils.add(2, 3);
+        System.out.println("Sum: " + sum);
+    }
+}`,
+  'Utils.java': `public class Utils {
+    public static int add(int a, int b) {
+        return a + b;
+    }
+}`,
+  'README.md': `# IntelliJ UI Mock
+This is a static HTML mockup of IntelliJ IDEA interface.
+- Supports editable code
+- Project panel
+- Tabs and status bar`
+};
+
+let currentFile = 'Main.java';
+
+// Load file content into editor
+function loadFile(fileName) {
+  currentFile = fileName;
+  editor.innerText = files[fileName];
+  updateActiveTabAndProject(fileName);
+  cursorPosition.textContent = 'Line 1, Column 1';
+  updateSuggestion();
+}
+
+// Update active tab and project panel
+function updateActiveTabAndProject(fileName) {
+  tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.file === fileName));
+  fileItems.forEach(item => item.classList.toggle('active', item.dataset.file === fileName));
+}
+
+// Tab click
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => loadFile(tab.dataset.file));
+});
+
+// Project panel click
+fileItems.forEach(item => {
+  item.addEventListener('click', () => loadFile(item.dataset.file));
+});
+
+// Update cursor position
+editor.addEventListener('keyup', () => { updateCursor(); updateSuggestion(); });
+editor.addEventListener('click', updateCursor);
+
+function updateCursor() {
+  const sel = window.getSelection();
+  if(sel && sel.anchorNode) {
+    const range = sel.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(editor);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    const textBeforeCursor = preCaretRange.toString();
+    const split = textBeforeCursor.split('\n');
+    const lineNum = split.length;
+    const colNum = split[split.length-1].length + 1;
+    cursorPosition.textContent = `Line ${lineNum}, Column ${colNum}`;
+  }
+}
+
+// Save editor content to files on change
+editor.addEventListener('input', () => { files[currentFile] = editor.innerText; updateSuggestion(); });
+
+// Simple typing suggestion (mocked)
+function updateSuggestion() {
+  const lines = editor.innerText.split('\n');
+  const lastLine = lines[lines.length - 1].trim();
+  if(lastLine.startsWith("System.out")) {
+    suggestionBox.textContent = "Hint: Consider using println() to display output";
+  } else if(lastLine.endsWith("{")) {
+    suggestionBox.textContent = "Next: Add your code inside the block";
+  } else {
+    suggestionBox.textContent = "";
+  }
+}
+
+// Initialize editor
+loadFile(currentFile);
+</script>
+
+</body>
+</html>
