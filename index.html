@@ -1,90 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IntelliJ UI Mock with Project Panel</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  body { display: flex; height: 100vh; background-color: #2b2b2b; color: #a9b7c6; overflow: hidden; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zara-Inspired IntelliJ Mock</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    body { display: flex; height: 100vh; background: #fff; color: #111; overflow: hidden; }
 
-  /* Left panels container */
-  .left-panels {
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-    background-color: #313335;
-    overflow-y: auto;
-  }
+    /* Left panels container */
+    .left-panels {
+      display: flex;
+      flex-direction: column;
+      width: 280px;
+      background-color: #f7f7f7;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
 
-  /* Project panel */
-  .project-panel {
-    background-color: #313335;
-    padding: 10px;
-    border-bottom: 1px solid #444;
-  }
-  .project-panel h2 { color: #ffffff; font-size: 16px; margin-bottom: 10px; }
-  .file-item { padding: 5px 10px; cursor: pointer; color: #a9b7c6; border-radius: 4px; }
-  .file-item:hover, .file-item.active { background-color: #3c3f41; color: #ffffff; }
+    /* Project panel */
+    .project-panel {
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    .project-panel h2 { font-size: 15px; margin-bottom: 10px; text-transform: uppercase; font-weight: 600; }
+    .file-item { padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 14px; }
+    .file-item:hover, .file-item.active { background-color: #111; color: #fff; }
 
-  /* Question panel */
-  .question-panel {
-    padding: 10px;
-    flex: 1;
-    overflow-y: auto;
-  }
-  .question-panel h2 { color: #ffffff; margin-bottom: 10px; font-size: 16px; }
-  .question-panel p, .question-panel ul { color: #c0c0c0; margin-bottom: 10px; }
+    /* Question panel */
+    .question-panel {
+      padding: 15px;
+      flex: 1;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+    }
+    .question-panel h2 { margin-bottom: 10px; font-size: 15px; font-weight: 600; }
+    .question-panel p, .question-panel ul { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
 
-  /* Candidate info and marks */
-  .candidate-info {
-    background-color: #2d2f31;
-    padding: 10px;
-    border-top: 1px solid #444;
-    color: #a9b7c6;
-    font-size: 13px;
-  }
-  .candidate-info div { margin-bottom: 5px; }
+    /* Candidate info */
+    .candidate-info {
+      padding: 12px;
+      border-top: 1px solid #ddd;
+      font-size: 13px;
+      background: #fafafa;
+    }
+    .candidate-info div { margin-bottom: 5px; }
 
-  /* Main editor area */
-  .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+    /* Main editor area */
+    .main { flex: 1; display: flex; flex-direction: column; position: relative; }
 
-  /* Tabs bar */
-  .tabs { display: flex; background-color: #3c3f41; height: 35px; align-items: center; padding-left: 10px; }
-  .tab { padding: 5px 15px; margin-right: 5px; background-color: #3c3f41; border-top-left-radius: 5px; border-top-right-radius: 5px; cursor: pointer; color: #a9b7c6; transition: background 0.2s; }
-  .tab.active { background-color: #2b2b2b; color: #ffffff; }
+    /* Tabs bar */
+    .tabs {
+      display: flex;
+      background-color: #f0f0f0;
+      height: 38px;
+      align-items: center;
+      padding-left: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab {
+      padding: 6px 15px;
+      margin-right: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px 4px 0 0;
+      background: transparent;
+      color: #555;
+      transition: background 0.2s;
+    }
+    .tab.active {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      color: #111;
+      font-weight: 500;
+    }
 
-  /* Editor area */
-  .editor { flex: 1; background-color: #2b2b2b; padding: 10px; overflow: auto; font-family: monospace; color: #a9b7c6; outline: none; white-space: pre; }
-  .line { display: flex; padding: 2px 0; }
-  .line-number { width: 40px; color: #606366; text-align: right; margin-right: 10px; user-select: none; }
-  .line.active { background-color: #323232; }
+    /* Editor */
+    .editor {
+      flex: 1;
+      background-color: #fff;
+      padding: 12px;
+      overflow: auto;
+      font-family: monospace;
+      font-size: 14px;
+      color: #111;
+      outline: none;
+      white-space: pre;
+    }
 
-  /* Status bar */
-  .status-bar { height: 25px; background-color: #3c3f41; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 12px; color: #a9b7c6; }
-  .status-bar div { display: flex; gap: 15px; }
+    /* Status bar */
+    .status-bar {
+      height: 28px;
+      background-color: #f7f7f7;
+      border-top: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 12px;
+      color: #555;
+    }
+    .status-bar div { display: flex; gap: 15px; }
 
-  /* Suggestion box */
-  .suggestion {
-    position: absolute;
-    bottom: 35px;
-    right: 10px;
-    background-color: #3c3f41;
-    color: #ffffff;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 13px;
-    pointer-events: none;
-    opacity: 0.8;
-  }
-</style>
+    /* Suggestion box */
+    .suggestion {
+      position: absolute;
+      bottom: 35px;
+      right: 10px;
+      background-color: #111;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .left-panels {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+      }
+      .project-panel, .question-panel, .candidate-info {
+        flex: 1;
+        border: none;
+        padding: 10px;
+        font-size: 13px;
+      }
+      .project-panel h2, .question-panel h2 { font-size: 14px; }
+    }
+    @media (max-width: 600px) {
+      .tabs { font-size: 12px; height: auto; }
+      .tab { padding: 4px 8px; font-size: 12px; }
+      .editor { font-size: 13px; }
+      .suggestion { font-size: 12px; padding: 4px 8px; }
+    }
+  </style>
 </head>
 <body>
 
 <!-- Left panels -->
 <div class="left-panels">
-  <!-- Project Panel -->
   <div class="project-panel">
     <h2>Project</h2>
     <div class="file-item active" data-file="Main.java">Main.java</div>
@@ -92,19 +156,14 @@
     <div class="file-item" data-file="README.md">README.md</div>
   </div>
 
-  <!-- Question Panel -->
   <div class="question-panel">
     <h2>Question: Sum of Two Numbers</h2>
     <p>Write a function that takes two integers <strong>a</strong> and <strong>b</strong> and returns their sum.</p>
-    <p>Example:</p>
-    <p>Input: a = 2, b = 3<br>Output: 5</p>
-    <p>Constraints:</p>
-    <ul>
-      <li>-1000 ≤ a, b ≤ 1000</li>
-    </ul>
+    <p><strong>Example:</strong><br>Input: a = 2, b = 3<br>Output: 5</p>
+    <p><strong>Constraints:</strong></p>
+    <ul><li>-1000 ≤ a, b ≤ 1000</li></ul>
   </div>
 
-  <!-- Candidate Info -->
   <div class="candidate-info">
     <div><strong>Candidate:</strong> John Doe</div>
     <div><strong>Assessment:</strong> Software Engineering Principles</div>
@@ -114,21 +173,16 @@
 
 <!-- Main editor area -->
 <div class="main">
-
-  <!-- Tabs -->
   <div class="tabs" id="tabs">
     <div class="tab active" data-file="Main.java">Main.java</div>
     <div class="tab" data-file="Utils.java">Utils.java</div>
     <div class="tab" data-file="README.md">README.md</div>
   </div>
 
-  <!-- Editor -->
   <div class="editor" id="editor" contenteditable="true"></div>
 
-  <!-- Suggestion box -->
   <div class="suggestion" id="suggestion"></div>
 
-  <!-- Status bar -->
   <div class="status-bar">
     <div>
       <span>UTF-8</span>
@@ -137,104 +191,87 @@
     </div>
     <div>
       <span>Git: main</span>
-      <span>⚡ IntelliJ Mock</span>
+      <span>⚡ Zara IntelliJ Mock</span>
     </div>
   </div>
-
 </div>
 
 <script>
-const editor = document.getElementById('editor');
-const tabs = document.querySelectorAll('.tab');
-const fileItems = document.querySelectorAll('.file-item');
-const cursorPosition = document.getElementById('cursor-position');
-const suggestionBox = document.getElementById('suggestion');
+  const editor = document.getElementById('editor');
+  const tabs = document.querySelectorAll('.tab');
+  const fileItems = document.querySelectorAll('.file-item');
+  const cursorPosition = document.getElementById('cursor-position');
+  const suggestionBox = document.getElementById('suggestion');
 
-// Initial file contents
-const files = {
-  'Main.java': `public class Main {
-    public static void main(String[] args) {
-        int sum = Utils.add(2, 3);
-        System.out.println("Sum: " + sum);
-    }
-}`,
-  'Utils.java': `public class Utils {
-    public static int add(int a, int b) {
-        return a + b;
-    }
-}`,
-  'README.md': `# IntelliJ UI Mock
-This is a static HTML mockup of IntelliJ IDEA interface.
-- Supports editable code
-- Project panel
-- Tabs and status bar`
-};
+  const files = {
+    'Main.java': `public class Main {
+      public static void main(String[] args) {
+          int sum = Utils.add(2, 3);
+          System.out.println("Sum: " + sum);
+      }
+  }`,
+    'Utils.java': `public class Utils {
+      public static int add(int a, int b) {
+          return a + b;
+      }
+  }`,
+    'README.md': `# IntelliJ UI Mock
+  This is a static HTML mockup of IntelliJ IDEA interface.
+  - Editable code
+  - Project panel
+  - Tabs and status bar`
+  };
 
-let currentFile = 'Main.java';
+  let currentFile = 'Main.java';
 
-// Load file content into editor
-function loadFile(fileName) {
-  currentFile = fileName;
-  editor.innerText = files[fileName];
-  updateActiveTabAndProject(fileName);
-  cursorPosition.textContent = 'Line 1, Column 1';
-  updateSuggestion();
-}
-
-// Update active tab and project panel
-function updateActiveTabAndProject(fileName) {
-  tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.file === fileName));
-  fileItems.forEach(item => item.classList.toggle('active', item.dataset.file === fileName));
-}
-
-// Tab click
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => loadFile(tab.dataset.file));
-});
-
-// Project panel click
-fileItems.forEach(item => {
-  item.addEventListener('click', () => loadFile(item.dataset.file));
-});
-
-// Update cursor position
-editor.addEventListener('keyup', () => { updateCursor(); updateSuggestion(); });
-editor.addEventListener('click', updateCursor);
-
-function updateCursor() {
-  const sel = window.getSelection();
-  if(sel && sel.anchorNode) {
-    const range = sel.getRangeAt(0);
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(editor);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    const textBeforeCursor = preCaretRange.toString();
-    const split = textBeforeCursor.split('\n');
-    const lineNum = split.length;
-    const colNum = split[split.length-1].length + 1;
-    cursorPosition.textContent = `Line ${lineNum}, Column ${colNum}`;
+  function loadFile(fileName) {
+    currentFile = fileName;
+    editor.innerText = files[fileName];
+    updateActive(fileName);
+    cursorPosition.textContent = 'Line 1, Column 1';
+    updateSuggestion();
   }
-}
 
-// Save editor content to files on change
-editor.addEventListener('input', () => { files[currentFile] = editor.innerText; updateSuggestion(); });
-
-// Simple typing suggestion (mocked)
-function updateSuggestion() {
-  const lines = editor.innerText.split('\n');
-  const lastLine = lines[lines.length - 1].trim();
-  if(lastLine.startsWith("System.out")) {
-    suggestionBox.textContent = "Hint: Consider using println() to display output";
-  } else if(lastLine.endsWith("{")) {
-    suggestionBox.textContent = "Next: Add your code inside the block";
-  } else {
-    suggestionBox.textContent = "";
+  function updateActive(fileName) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.file === fileName));
+    fileItems.forEach(f => f.classList.toggle('active', f.dataset.file === fileName));
   }
-}
 
-// Initialize editor
-loadFile(currentFile);
+  tabs.forEach(tab => tab.addEventListener('click', () => loadFile(tab.dataset.file)));
+  fileItems.forEach(item => item.addEventListener('click', () => loadFile(item.dataset.file)));
+
+  editor.addEventListener('keyup', () => { updateCursor(); updateSuggestion(); });
+  editor.addEventListener('click', updateCursor);
+  editor.addEventListener('input', () => { files[currentFile] = editor.innerText; updateSuggestion(); });
+
+  function updateCursor() {
+    const sel = window.getSelection();
+    if(sel && sel.anchorNode) {
+      const range = sel.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(editor);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      const textBeforeCursor = preCaretRange.toString();
+      const split = textBeforeCursor.split('\n');
+      const lineNum = split.length;
+      const colNum = split[split.length-1].length + 1;
+      cursorPosition.textContent = `Line ${lineNum}, Column ${colNum}`;
+    }
+  }
+
+  function updateSuggestion() {
+    const lines = editor.innerText.split('\n');
+    const lastLine = lines[lines.length - 1].trim();
+    if(lastLine.startsWith("System.out")) {
+      suggestionBox.textContent = "Hint: Use println() for output";
+    } else if(lastLine.endsWith("{")) {
+      suggestionBox.textContent = "Next: Add your code inside the block";
+    } else {
+      suggestionBox.textContent = "";
+    }
+  }
+
+  loadFile(currentFile);
 </script>
-
 </body>
 </html>
